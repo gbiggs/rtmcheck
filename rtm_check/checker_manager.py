@@ -106,9 +106,9 @@ class CheckerManager:
         '''
         results = {}
         for c in categories:
-            if c not in self.checkers:
+            if c not in self._checkers:
                 raise NoSuchCategoryError(c)
-            results[c] = self._run_category(c)
+            results[c] = self._run_category(self._checkers[c])
         return results
 
     def run_individual_check(self, category, checker):
@@ -116,12 +116,12 @@ class CheckerManager:
 
         The category name and checker name must be provided.
         '''
-        if category not in self.checkers:
+        if category not in self._checkers:
             raise NoSuchCategoryError(category)
-        if checker not in self.checkers[category]:
+        if checker not in self._checkers[category]:
             raise NoSuchCheckerError(c)
         return {category: {checker:
-            self.checkers[category][checker].run_check()}}
+            self._checkers[category][checker].run_check()}}
 
     def _run_category(self, category):
         '''Runs all checkers in the provided category dictionary.'''
