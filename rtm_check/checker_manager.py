@@ -48,18 +48,18 @@ class CheckerManager:
 
     '''
 
-    # self._checkers is a dictionary containing all the loaded checkers.
+    # self._chckdb is a dictionary containing all the loaded checkers.
     # The keys of the dictionary are the categories. Each category is
     # itself a dictionary, where the keys are checker names and the entries
     # are loaded checker modules.
 
     def __init__(self):
-        self._load_default_checkers()
+        self._load_default_chckdb()
 
     @property
     def categories(self):
         '''List of all category names available from the loaded checkers.'''
-        return self._checkers.keys()
+        return self._chckdb.keys()
 
     @property
     def checkers(self):
@@ -67,16 +67,16 @@ class CheckerManager:
 
         Format of the list is (<checker>, <category>)'''
         result = []
-        for cat in self._checkers:
-            result += [(chk, cat) for chk in self._checkers[cat]]
+        for cat in self._chckdb:
+            result += [(chk, cat) for chk in self._chckdb[cat]]
         return result
 
     def get_checker_description(self, category, checker):
-        if category not in self._checkers:
+        if category not in self._chckdb:
             raise NoSuchCategoryError(category)
-        if checker not in self._checkers[category]:
+        if checker not in self._chckdb[category]:
             raise NoSuchCheckerError(c)
-        return self._checkers[category][checker].description
+        return self._chckdb[category][checker].description
 
     def load_from_dir(self, d):
         '''Load all checkers in the specified directory.'''
@@ -95,7 +95,7 @@ class CheckerManager:
         '''
         results = {}
         for c in self.categories:
-            results[c] = self._run_category(self._checkers[c])
+            results[c] = self._run_category(self._chckdb[c])
         return results
 
     def run_category_checks(self, categories):
@@ -106,22 +106,30 @@ class CheckerManager:
         '''
         results = {}
         for c in categories:
-            if c not in self._checkers:
+            if c not in self._chckdb:
                 raise NoSuchCategoryError(c)
-            results[c] = self._run_category(self._checkers[c])
+            results[c] = self._run_category(self._chckdb[c])
         return results
+
+    def run_individual_checks(self, category, checker):
+        '''Run a set of individual checkers.
+
+        If a list of categories is provided, the checkers must be in those
+        categories.
+        '''
+        pass
 
     def run_individual_check(self, category, checker):
         '''Run a single checker.
 
         The category name and checker name must be provided.
         '''
-        if category not in self._checkers:
+        if category not in self._chckdb:
             raise NoSuchCategoryError(category)
-        if checker not in self._checkers[category]:
+        if checker not in self._chckdb[category]:
             raise NoSuchCheckerError(c)
         return {category: {checker:
-            self._checkers[category][checker].run_check()}}
+            self._chckdb[category][checker].run_check()}}
 
     def _run_category(self, category):
         '''Runs all checkers in the provided category dictionary.'''
@@ -130,15 +138,15 @@ class CheckerManager:
             results[c] = category[c].run_check()
         return results
 
-    def _load_default_checkers(self):
+    def _load_default_chckdb(self):
         # Finds all checkers in the default locations
-        self._checkers = {}
+        self._chckdb = {}
         import rtm_check.checkers
         for checker in [getattr(rtm_check.checkers, m)
                 for m in dir(rtm_check.checkers) if not m.startswith('__')]:
-            if checker.category not in self._checkers:
-                self._checkers[checker.category] = {}
-            self._checkers[checker.category][checker.name] = checker
+            if checker.category not in self._chckdb:
+                self._chckdb[checker.category] = {}
+            self._chckdb[checker.category][checker.name] = checker
 
     def _load_checker(self, f):
         # Loads the specified checker module

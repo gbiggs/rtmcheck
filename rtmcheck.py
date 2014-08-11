@@ -104,7 +104,7 @@ def main():
         return 0
     elif args.checkers:
         # Run the specified checkers
-        pass
+        results = cm.run_individual_checks(self, args.categories, args.checkers)
     elif args.categories:
         # Run the specified categories
         results = cm.run_category_checks(args.categories)
