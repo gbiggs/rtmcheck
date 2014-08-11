@@ -19,6 +19,7 @@ Checker manager class responsible for managing available checkers.
 '''
 
 import os.path
+import sys
 
 from rtm_check.exceptions import NoSuchCategoryError, NoSuchCheckerError
 
@@ -148,9 +149,16 @@ class CheckerManager:
                 self._chckdb[checker.category] = {}
             self._chckdb[checker.category][checker.name] = checker
 
-    def _load_checker(self, f):
+    def _load_checker(self, fn):
         # Loads the specified checker module
-        pass
+        if sys.version_info[0] == 3:
+            import importlib.machinery
+            loader = importlib.machinery.SourceFileLoader('temp_m', fn)
+            m = loader.load_module('temp_m'))
+        else:
+            import imp
+            m = imp.load_source('temp_m', fn)
+        self._chckdb[m.category][m.name] = m
 
 # vim: tw=79
 
